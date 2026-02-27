@@ -36,7 +36,7 @@ SEVERITY_MAP = {
 
 
 class WeaponDetector:
-    def __init__(self, model_path: str = "runs/detect/train/weights/best.pt", conf_threshold: float = 0.50, iou_threshold: float = 0.45, imgsz: int = 768):
+    def __init__(self, model_path: str = "runs/detect/train/weights/best.pt", conf_threshold: float = 0.55, iou_threshold: float = 0.45, imgsz: int = 768):
         self.device = get_device()
         self.model = YOLO(model_path)
         self.model = optimize_model(self.model, self.device)
@@ -45,10 +45,34 @@ class WeaponDetector:
         self.imgsz = imgsz
         print(f"[WeaponDetector] Loaded model classes: {self.model.names}")
         
-        # Temporal smoothing (require 2 consecutive frames to confirm — relaxed for fast motion)
+        # Build valid class ID set from trained model names
+        self._valid_class_ids = set()
+        for cls_id, cls_name in self.model.names.items():
+            normalized = cls_name.lower().replace(" ", "_").replace("-", "_")
+            if normalized in SEVERITY_MAP:
+                self._valid_class_ids.add(cls_id)
+        print(f"[WeaponDetector] Valid class IDs: {self._valid_class_ids}")
+        
+        # Temporal smoothing (require 2 consecutive frames to confirm)
         self.smoother = TemporalSmoother(min_frames=2)
         self.total_weapons_detected = 0
         self._tracked_weapon_ids = set()
+        
+        # Motion consistency: store previous frame bounding boxes by track ID
+        self._prev_boxes = {}
+
+    @staticmethod
+    def _box_iou(box_a, box_b):
+        """Compute IoU between two [x1,y1,x2,y2] boxes. No external imports needed."""
+        xa = max(box_a[0], box_b[0])
+        ya = max(box_a[1], box_b[1])
+        xb = min(box_a[2], box_b[2])
+        yb = min(box_a[3], box_b[3])
+        inter = max(0, xb - xa) * max(0, yb - ya)
+        area_a = (box_a[2] - box_a[0]) * (box_a[3] - box_a[1])
+        area_b = (box_b[2] - box_b[0]) * (box_b[3] - box_b[1])
+        union = area_a + area_b - inter
+        return inter / union if union > 0 else 0.0
 
     def detect_weapons(self, frame: np.ndarray) -> Dict[str, Any]:
         """
@@ -66,6 +90,7 @@ class WeaponDetector:
         )
         
         raw_detections = []
+        current_boxes = {}
         
         if results and len(results) > 0:
             result = results[0]
@@ -77,11 +102,32 @@ class WeaponDetector:
                     cls_id = int(box.cls[0].item())
                     track_id = int(box.id[0].item()) if box.id is not None else -1
                     
-                    # Minimum bounding box area filter — ignore tiny/noisy detections
+                    # Filter 1: Strict class validation — only trained weapon classes
+                    if cls_id not in self._valid_class_ids:
+                        continue
+                    
+                    # Filter 2: Minimum bounding box area (1000px)
                     width = x2 - x1
                     height = y2 - y1
-                    if width * height < 800:
+                    area = width * height
+                    if area < 1000:
                         continue
+                    
+                    # Filter 3: Aspect ratio — reject random square/flat shapes
+                    aspect_ratio = width / height if height > 0 else 0
+                    if aspect_ratio < 0.2 or aspect_ratio > 5.0:
+                        continue
+                    
+                    # Filter 4: Motion consistency — check IoU with previous frame box
+                    bbox_int = [int(x1), int(y1), int(x2), int(y2)]
+                    if track_id != -1 and track_id in self._prev_boxes:
+                        iou = self._box_iou(bbox_int, self._prev_boxes[track_id])
+                        if iou < 0.2:
+                            continue  # Unstable detection, skip
+                    
+                    # Store current box for next frame's motion check
+                    if track_id != -1:
+                        current_boxes[track_id] = bbox_int
                     
                     # Ensure correct model names are used (fallback to unknown)
                     model_class_name = self.model.names.get(cls_id, "unknown")
@@ -89,19 +135,22 @@ class WeaponDetector:
                     print(f"[WeaponDetector ID:{track_id}] Detected: {model_class_name} (conf: {conf:.2f})")
                     
                     normalized_name = model_class_name.lower().replace(" ", "_").replace("-", "_")
-                    severity = SEVERITY_MAP.get(normalized_name, "HIGH") # default to HIGH if detected but not mapped
+                    severity = SEVERITY_MAP.get(normalized_name, "HIGH")
                     
                     raw_detections.append({
                         "id": track_id,
                         "class_name": model_class_name,
                         "confidence": round(conf, 3),
                         "severity": severity,
-                        "bbox": [int(x1), int(y1), int(x2), int(y2)],
+                        "bbox": bbox_int,
                         "center": (int((x1 + x2) / 2), int((y1 + y2) / 2))
                     })
+        
+        # Update previous boxes for next frame
+        self._prev_boxes = current_boxes
 
         # Apply temporal smoothing
-        # Only detections that have appeared in 3 consecutive frames
+        # Only detections that have appeared in 2 consecutive frames
         confirmed_detections = self.smoother.update(raw_detections)
 
         threat_detected = len(confirmed_detections) > 0
@@ -133,3 +182,4 @@ class WeaponDetector:
         self.smoother.reset()
         self.total_weapons_detected = 0
         self._tracked_weapon_ids.clear()
+        self._prev_boxes.clear()
