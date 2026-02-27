@@ -13,7 +13,7 @@ from services.tracker import CentroidTracker
 
 
 class CrowdDetector:
-    def __init__(self, model_path: str = "yolov8n.pt", conf_threshold: float = 0.30, iou_threshold: float = 0.50, imgsz: int = 960):
+    def __init__(self, model_path: str = "yolov8n.pt", conf_threshold: float = 0.35, iou_threshold: float = 0.45, imgsz: int = 960):
         self.device = get_device()
         self.model = YOLO(model_path)
         self.model = optimize_model(self.model, self.device)
@@ -57,6 +57,12 @@ class CrowdDetector:
                 for box in boxes:
                     x1, y1, x2, y2 = box.xyxy[0].tolist()
                     conf = float(box.conf[0].item())
+                    
+                    # Minimum bounding box area filter — ignore tiny/noisy detections
+                    width = x2 - x1
+                    height = y2 - y1
+                    if width * height < 500:
+                        continue
                     
                     track_id = int(box.id[0].item()) if box.id is not None else None
                     

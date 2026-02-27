@@ -27,9 +27,9 @@ CROWD_MODEL = "yolov8m.pt" # Upgraded to medium for better accuracy, runs fine o
 WEAPON_MODEL = "runs/detect/train/weights/best.pt"
 
 print(f"Loading Crowd Model: {CROWD_MODEL}...")
-crowd_detector = CrowdDetector(model_path=CROWD_MODEL, conf_threshold=0.30, imgsz=960)
+crowd_detector = CrowdDetector(model_path=CROWD_MODEL, conf_threshold=0.35, imgsz=960)
 print(f"Loading Weapon Model: {WEAPON_MODEL}...")
-weapon_detector = WeaponDetector(model_path=WEAPON_MODEL, conf_threshold=0.40, imgsz=960)
+weapon_detector = WeaponDetector(model_path=WEAPON_MODEL, conf_threshold=0.50, imgsz=960)
 
 engine = VideoEngine(crowd_detector, weapon_detector)
 

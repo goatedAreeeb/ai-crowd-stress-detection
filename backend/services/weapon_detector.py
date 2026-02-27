@@ -36,7 +36,7 @@ SEVERITY_MAP = {
 
 
 class WeaponDetector:
-    def __init__(self, model_path: str = "runs/detect/train/weights/best.pt", conf_threshold: float = 0.40, iou_threshold: float = 0.45, imgsz: int = 768):
+    def __init__(self, model_path: str = "runs/detect/train/weights/best.pt", conf_threshold: float = 0.50, iou_threshold: float = 0.45, imgsz: int = 768):
         self.device = get_device()
         self.model = YOLO(model_path)
         self.model = optimize_model(self.model, self.device)
@@ -76,6 +76,12 @@ class WeaponDetector:
                     conf = float(box.conf[0].item())
                     cls_id = int(box.cls[0].item())
                     track_id = int(box.id[0].item()) if box.id is not None else -1
+                    
+                    # Minimum bounding box area filter — ignore tiny/noisy detections
+                    width = x2 - x1
+                    height = y2 - y1
+                    if width * height < 800:
+                        continue
                     
                     # Ensure correct model names are used (fallback to unknown)
                     model_class_name = self.model.names.get(cls_id, "unknown")
