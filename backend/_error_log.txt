@@ -1,0 +1,73 @@
+DATA_PATH: D:\ai based crowd detection appp\backend\security_dataset\data.yaml
+EXISTS: True
+YAML CONTENT:
+# ============================================================
+# Suspicious Object Detection - YOLOv8 Dataset Configuration
+# ============================================================
+# This file tells the YOLOv8 trainer where to find images/labels
+# and what classes to detect.
+#
+# Target: ~300-400 images per class for a balanced dataset.
+# Total target: 3,600 - 4,800 annotated images.
+# ============================================================
+
+# --- Paths (relative to this YAML file) ---
+path: .                          # Dataset root directory
+train: images/train              # Training images
+val: images/val                  # Validation images
+
+# --- Number of Classes ---
+nc: 12
+
+# --- Class Names ---
+# Organized by threat category for clarity.
+names:
+  # ---- Firearms ----
+  0: pistol
+  1: revolver
+  2: rifle
+
+  # ---- Bladed Weapons ----
+  3: kitchen_knife
+  4: dagger
+  5: machete
+  6: large_blade
+
+  # ---- Blunt / Improvised Weapons ----
+  7: metal_rod
+  8: bat_or_club
+
+  # ---- Suspicious Items ----
+  9: unattended_backpack
+  10: suspicious_bag
+  11: large_unusual_object
+
+New https://pypi.org/project/ultralytics/8.4.15 available 😃 Update with 'pip install -U ultralytics'
+Ultralytics YOLOv8.2.26 🚀 Python-3.10.11 torch-2.2.2+cpu CPU (13th Gen Intel Core(TM) i5-13450HX)
+[34m[1mengine\trainer: [0mtask=detect, mode=train, model=yolov8m.pt, data=D:\ai based crowd detection appp\backend\security_dataset\data.yaml, epochs=1, time=None, patience=100, batch=2, imgsz=640, save=True, save_period=-1, cache=False, device=cpu, workers=0, project=None, name=train5, exist_ok=False, pretrained=True, optimizer=auto, verbose=True, seed=0, deterministic=True, single_cls=False, rect=False, cos_lr=False, close_mosaic=10, resume=False, amp=True, fraction=1.0, profile=False, freeze=None, multi_scale=False, overlap_mask=True, mask_ratio=4, dropout=0.0, val=True, split=val, save_json=False, save_hybrid=False, conf=None, iou=0.7, max_det=300, half=False, dnn=False, plots=True, source=None, vid_stride=1, stream_buffer=False, visualize=False, augment=False, agnostic_nms=False, classes=None, retina_masks=False, embed=None, show=False, save_frames=False, save_txt=False, save_conf=False, save_crop=False, show_labels=True, show_conf=True, show_boxes=True, line_width=None, format=torchscript, keras=False, optimize=False, int8=False, dynamic=False, simplify=False, opset=None, workspace=4, nms=False, lr0=0.01, lrf=0.01, momentum=0.937, weight_decay=0.0005, warmup_epochs=3.0, warmup_momentum=0.8, warmup_bias_lr=0.1, box=7.5, cls=0.5, dfl=1.5, pose=12.0, kobj=1.0, label_smoothing=0.0, nbs=64, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, degrees=0.0, translate=0.1, scale=0.5, shear=0.0, perspective=0.0, flipud=0.0, fliplr=0.5, bgr=0.0, mosaic=1.0, mixup=0.0, copy_paste=0.0, auto_augment=randaugment, erasing=0.4, crop_fraction=1.0, cfg=None, tracker=botsort.yaml, save_dir=runs\detect\train5
+Traceback (most recent call last):
+  File "D:\ai based crowd detection appp\backend\venv\lib\site-packages\ultralytics\engine\trainer.py", line 517, in get_dataset
+    data = check_det_dataset(self.args.data)
+  File "D:\ai based crowd detection appp\backend\venv\lib\site-packages\ultralytics\data\utils.py", line 329, in check_det_dataset
+    raise FileNotFoundError(m)
+FileNotFoundError: 
+Dataset 'D://ai based crowd detection appp/backend/security_dataset/data.yaml' images not found ⚠️, missing path 'D:\ai based crowd detection appp\backend\datasets\images\val'
+Note dataset download directory is 'D:\ai based crowd detection appp\backend\datasets'. You can update this in 'C:\Users\zayum\AppData\Roaming\Ultralytics\settings.yaml'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ai based crowd detection appp\backend\_diag.py", line 18, in <module>
+    m.train(data=data_path, epochs=1, imgsz=640, batch=2, device="cpu", workers=0)
+  File "D:\ai based crowd detection appp\backend\venv\lib\site-packages\ultralytics\engine\model.py", line 655, in train
+    self.trainer = (trainer or self._smart_load("trainer"))(overrides=args, _callbacks=self.callbacks)
+  File "D:\ai based crowd detection appp\backend\venv\lib\site-packages\ultralytics\engine\trainer.py", line 130, in __init__
+    self.trainset, self.testset = self.get_dataset()
+  File "D:\ai based crowd detection appp\backend\venv\lib\site-packages\ultralytics\engine\trainer.py", line 521, in get_dataset
+    raise RuntimeError(emojis(f"Dataset '{clean_url(self.args.data)}' error ❌ {e}")) from e
+RuntimeError: Dataset 'D://ai based crowd detection appp/backend/security_dataset/data.yaml' error  
+Dataset 'D://ai based crowd detection appp/backend/security_dataset/data.yaml' images not found , missing path 'D:\ai based crowd detection appp\backend\datasets\images\val'
+Note dataset download directory is 'D:\ai based crowd detection appp\backend\datasets'. You can update this in 'C:\Users\zayum\AppData\Roaming\Ultralytics\settings.yaml'
+ERROR: Dataset 'D://ai based crowd detection appp/backend/security_dataset/data.yaml' error  
+Dataset 'D://ai based crowd detection appp/backend/security_dataset/data.yaml' images not found , missing path 'D:\ai based crowd detection appp\backend\datasets\images\val'
+Note dataset download directory is 'D:\ai based crowd detection appp\backend\datasets'. You can update this in 'C:\Users\zayum\AppData\Roaming\Ultralytics\settings.yaml'

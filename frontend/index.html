@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Camera Feed - Crowd Management System</title>
+    <!-- Use Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="theme-normal">
+
+    <!-- Top System Nav -->
+    <nav class="top-nav">
+        <div class="nav-brand">Crowd Management System</div>
+        <div class="nav-links">
+            <a href="#dashboard-section" class="active">Dashboard</a>
+            <a href="#video-section">Live Feed</a>
+        </div>
+    </nav>
+
+    <!-- SECTION 1: DASHBOARD STATS (Full screen height) -->
+    <section id="dashboard-section" class="full-screen-section">
+        <header class="page-header">
+            <h1>Crowd Intelligence Dashboard</h1>
+            <p>Real-time Density Analysis & Monitoring</p>
+        </header>
+
+        <!-- Stats Matrix -->
+        <div class="stats-matrix glass-panel">
+            <div class="stat-box">
+                <div class="stat-value text-blue" id="val-people">0</div>
+                <div class="stat-label">TOTAL PEOPLE</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value text-blue" id="val-density">Low</div>
+                <div class="stat-label">DENSITY LEVEL</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value text-blue text-risk" id="val-risk">Safe</div>
+                <div class="stat-label">SYSTEM STATUS</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value text-blue" id="val-uptime">00:00</div>
+                <div class="stat-label">UPTIME</div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <p>Scroll down for Camera & Analysis</p>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M19 12l-7 7-7-7" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- SECTION 2: VIDEO & CONTROLS (Full screen height) -->
+    <section id="video-section" class="full-screen-section bg-darker">
+        <div class="video-workspace">
+
+            <div class="workspace-header">
+                <h2>Analysis Feed</h2>
+                <div class="source-controls">
+                    <button class="btn btn-primary" id="btn-start-camera">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                            <circle cx="12" cy="13" r="4" />
+                        </svg>
+                        Open Camera
+                    </button>
+                    <button class="btn btn-secondary" id="btn-open-upload">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                        </svg>
+                        Upload Video
+                    </button>
+                    <button class="btn btn-secondary" id="btn-toggle-heatmap">
+                        Toggle Heat Map
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Video Area -->
+            <div class="video-container" id="video-wrapper">
+                <!-- src is set dynamically by script.js once the camera is started or a video is uploaded -->
+                <img id="video-stream" src="" alt="Waiting for camera feed..." />
+
+                <div class="emergency-overlay" id="emergency-overlay">
+                    <h2 id="emergency-title">EMERGENCY PROTOCOL ACTIVATED</h2>
+                    <p id="emergency-desc">Critical density detected! Area per person is dangerously low.</p>
+                </div>
+            </div>
+
+            <!-- Playback Controls (Hidden if camera mode) -->
+            <div class="playback-controls glass-panel" id="playback-controls" style="display: none;">
+                <button class="btn-icon" id="btn-play-pause">
+                    <!-- Default Pause Icon -->
+                    <svg id="icon-pause" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                    <!-- Play Icon (hidden initially) -->
+                    <svg id="icon-play" style="display: none;" width="20" height="20" viewBox="0 0 24 24"
+                        fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                </button>
+
+                <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" value="0">
+                <span class="progress-text" id="progress-text">0%</span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- System Status Bar -->
+    <div class="system-status-bar" id="system-status-bar">
+        <span>&#9432; Status: Ready</span>
+        <span class="pulse-indicator status-green"></span>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="upload-modal">
+        <div class="modal-content glass-panel">
+            <button class="modal-close" id="btn-close-upload">&times;</button>
+            <h2>Upload Video for Crowd Analysis</h2>
+            <p class="modal-subtitle">Supported formats: MP4, MOV, AVI (Max size: 100MB)</p>
+
+            <div class="upload-area" id="upload-area">
+                <input type="file" id="file-input" accept="video/mp4,video/x-m4v,video/*">
+                <div class="file-name-display" id="file-name-display">Choose File...</div>
+                <button class="btn btn-primary" id="btn-fake-browse">Browse</button>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="btn-submit-upload" disabled>Upload & Analyze</button>
+            <p class="upload-status" id="upload-status-text"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

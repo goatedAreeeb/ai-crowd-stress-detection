@@ -1,0 +1,40 @@
+# ============================================================
+# Suspicious Object Detection - YOLOv8 Dataset Configuration
+# ============================================================
+# This file tells the YOLOv8 trainer where to find images/labels
+# and what classes to detect.
+#
+# Target: ~300-400 images per class for a balanced dataset.
+# Total target: 3,600 - 4,800 annotated images.
+# ============================================================
+
+# --- Paths (absolute to avoid YOLO path resolution issues) ---
+path: D:/ai based crowd detection appp/backend/security_dataset
+train: images/train
+val: images/val
+
+# --- Number of Classes ---
+nc: 12
+
+# --- Class Names ---
+# Organized by threat category for clarity.
+names:
+  # ---- Firearms ----
+  0: pistol
+  1: revolver
+  2: rifle
+
+  # ---- Bladed Weapons ----
+  3: kitchen_knife
+  4: dagger
+  5: machete
+  6: large_blade
+
+  # ---- Blunt / Improvised Weapons ----
+  7: metal_rod
+  8: bat_or_club
+
+  # ---- Suspicious Items ----
+  9: unattended_backpack
+  10: suspicious_bag
+  11: large_unusual_object

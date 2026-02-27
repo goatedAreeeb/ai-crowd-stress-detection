@@ -1,0 +1,29 @@
+# Python
+**/venv/
+**/__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Node
+**/node_modules/
+**/dist/
+
+# Training artifacts
+**/runs/
+
+# Uploads (large video files)
+backend/uploads/
+*.mp4
+*.mov
+
+# Env
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
