@@ -5,6 +5,8 @@ import StatsCard from '../components/StatsCard';
 import AlertBanner from '../components/AlertBanner';
 import { useWebSocket } from '../contexts/WebSocketContext';
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 const LiveDetection = () => {
     const { stats } = useWebSocket();
     const [isPlaying, setIsPlaying] = useState(stats.status === "Running");
@@ -22,7 +24,7 @@ const LiveDetection = () => {
 
     const handleStart = async () => {
         try {
-            const res = await fetch('http://localhost:8000/api/start-camera', { method: 'POST' });
+            const res = await fetch(`${API_BASE}/api/start-camera`, { method: 'POST' });
             if (res.ok) {
                 setStreamKey(Date.now());
                 setIsPlaying(true);
@@ -34,7 +36,7 @@ const LiveDetection = () => {
 
     const handleStop = async () => {
         try {
-            await fetch('http://localhost:8000/api/stop-camera', { method: 'POST' });
+            await fetch(`${API_BASE}/api/stop-camera`, { method: 'POST' });
             setIsPlaying(false);
         } catch (e) {
             console.error(e);
@@ -71,7 +73,7 @@ const LiveDetection = () => {
                             <img
                                 ref={imgRef}
                                 key={streamKey}
-                                src={`http://localhost:8000/api/video?t=${streamKey}`}
+                                src={`${API_BASE}/api/video?t=${streamKey}`}
                                 alt="Live Video Feed"
                                 className="w-full h-full object-cover"
                                 onError={() => {

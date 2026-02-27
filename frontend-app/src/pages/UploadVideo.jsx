@@ -4,6 +4,8 @@ import StatsCard from '../components/StatsCard';
 import AlertBanner from '../components/AlertBanner';
 import { useWebSocket } from '../contexts/WebSocketContext';
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 const UploadVideo = () => {
     const { stats } = useWebSocket();
     const [file, setFile] = useState(null);
@@ -11,7 +13,7 @@ const UploadVideo = () => {
     const [isStreaming, setIsStreaming] = useState(() => {
         return sessionStorage.getItem('uploadStreaming') === 'true';
     });
-    const [streamKey] = useState(() => Date.now());
+    const [streamKey, setStreamKey] = useState(() => Date.now());
 
     const handleDrop = (e) => {
         e.preventDefault();
@@ -31,7 +33,7 @@ const UploadVideo = () => {
         formData.append('file', file);
 
         try {
-            const res = await fetch('http://localhost:8000/api/upload', {
+            const res = await fetch(`${API_BASE}/api/upload`, {
                 method: 'POST',
                 body: formData,
             });
@@ -52,7 +54,7 @@ const UploadVideo = () => {
 
     const handleStopAndReset = async () => {
         try {
-            await fetch('http://localhost:8000/api/stop-camera', { method: 'POST' });
+            await fetch(`${API_BASE}/api/stop-camera`, { method: 'POST' });
         } catch (e) { }
         setIsStreaming(false);
         setFile(null);
@@ -115,9 +117,14 @@ const UploadVideo = () => {
                     {isStreaming && !isUploading && (
                         <div className="glass-panel overflow-hidden bg-black aspect-video rounded-2xl flex items-center justify-center relative">
                             <img
-                                src={`http://localhost:8000/api/video?t=${streamKey}`}
+                                src={`${API_BASE}/api/video?t=${streamKey}`}
                                 alt="Processed Video Feed"
                                 className="w-full h-full object-cover"
+                                onError={() => {
+                                    if (isStreaming) {
+                                        setTimeout(() => setStreamKey(Date.now()), 2000);
+                                    }
+                                }}
                             />
                             {/* Processing Indicator */}
                             <div className="absolute top-4 right-4 flex items-center gap-2 bg-black/60 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
